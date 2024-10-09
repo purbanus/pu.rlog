@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="pu.rlog" basedir="." default="deploy-tst"
+	xmlns:ivy="antlib:org.apache.ivy.ant"
+>
+	<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" />
+	<property file="build.properties" />
+
+	<property name="projectname"            value="rlog" />
+<!--	<property name="alg.lib.project"        value="../alg.lib" />-->
+	<property name="pu.base.project"        value="/${user.home}/projecten/git/pu.base/pu.base/" />
+
+	<property name="src.dir"           value="src/main/java" />
+	<property name="webapp.dir"        value="src/main/webapp" />
+	<property name="intern.lib.dir"    value="lib" />
+	<property name="bin.dir"           value="bin" />
+	<property name="build.dir"         value="build" />
+	<property name="build.classes.dir" value="${build.dir}/WEB-INF/classes" />
+	<property name="build.lib.dir"     value="${build.dir}/WEB-INF/lib" />
+	<property name="omgeving.dir"      value="per-omgeving" />
+
+	<patternset id="jar-excludes">
+		<exclude name="**/test/**/*.*" />
+		<exclude name="**/cradle/**/*.*" />
+		<exclude name="**/grave/**/*.*" />
+		<exclude name="**/tryout/**/*.*" />
+		<!-- <exclude name="**/adhoc/**/*.*" />	-->
+		<exclude name="log4j.properties" />
+		<exclude name="log4j.xml" />
+	</patternset>
+	
+	<!-- ============================================================== -->
+	<!-- Usage                                                          -->
+	<!-- ============================================================== -->
+
+	<target name="usage">
+		<echo message="" />
+		<echo message="${projectname} build file" />
+		<echo message="-----------------------------------" />
+		<echo message="" />
+		<echo message="Available targets are:" />
+		<echo message="" />
+		<echo message="build      --> Build the application" />
+		<echo message="clean      --> Clean output directories" />
+		<echo message="deploy-tst --> Deploy tst version as directory" />
+		<echo message="deploy-acc --> Deploy acc version as directory" />
+		<echo message="deploy-prd --> Deploy prd version as directory" />
+		<echo message="" />
+	</target>
+
+	<!-- ============================================================== -->
+	<!-- Initialize                                                     -->
+	<!-- ============================================================== -->
+
+	<target name="initialize">
+		<echo>${ant.version}</echo>
+		<tstamp>
+			<format property="nu" pattern="yyyy-MM-dd HH:mm:ss" />
+		</tstamp>
+		<echo>${nu}</echo>
+		<ivy:settings />
+		<ivy:info organisation="pu" module="rlog" revision="1.0.0" property="ivyinfo" />
+		<echoproperties prefix="ivyinfo" />
+	</target>
+
+	<target name="tst-properties">
+		<property name="omgeving" value="tst" />
+	</target>
+	
+	<target name="acc-properties">
+		<property name="omgeving" value="acc" />
+	</target>
+		
+	<target name="prd-mc-properties">
+		<property name="omgeving" value="prd-mc" />
+	</target>
+	<target name="prd-ddb-properties">
+		<property name="omgeving" value="prd-ddb" />
+	</target>
+	<target name="prd-jwt-properties">
+		<property name="omgeving" value="prd-jwt" />
+	</target>
+
+	<!-- ============================================================== -->
+	<!-- Clean                                                          -->
+	<!-- PAS OP: Dit is een heuse delete!                               -->
+	<!-- ============================================================== -->
+
+	<target name="clean">
+
+		<delete dir="${build.dir}" />
+		<mkdir dir="${build.classes.dir}" />
+		<mkdir dir="${build.lib.dir}" />
+
+	</target>
+
+	<!-- ============================================================== -->
+	<!-- Build                                                          -->
+	<!-- ============================================================== -->
+
+	<target name="build-tst" depends="tst-properties, build-alg" />
+	<target name="build-acc" depends="acc-properties, build-alg" />
+	<target name="build-prd-mc" depends="prd-mc-properties, build-alg" />
+	<target name="build-prd-ddb" depends="prd-ddb-properties, build-alg" />
+	<target name="build-prd-jwt" depends="prd-jwt-properties, build-alg" />
+	<target name="build-alg" depends="initialize, clean">
+		
+		<mkdir dir="${build.dir}/WEB-INF" />
+		
+		<copy todir="${build.dir}/WEB-INF">
+			<fileset dir="${webapp.dir}/WEB-INF">
+				<!-- Door dit weg te laten worden ook lege directories gelopieerd -->
+				<!--  <include name="**/*.*"/> -->
+			</fileset>
+		</copy>
+		<copy todir="${build.dir}" overwrite="true">
+			<fileset dir="${omgeving.dir}/${omgeving}">
+				<!-- Door dit weg te laten worden ook lege directories gelopieerd -->
+				<!--  <include name="**/*.*"/> -->
+			</fileset>
+		</copy>
+
+		<copy todir="${build.classes.dir}">
+			<fileset dir="${bin.dir}">
+				<include name="**/*.*"/><!-- Onderdrukt lege directories -->
+				<exclude name="WEB-INF/**/*.*" />
+				<patternset refid="jar-excludes" />
+			</fileset>
+		</copy>
+		
+		<!-- type is nodig anders krijg je ook source mee -->
+		<ivy:retrieve pattern="${build.lib.dir}/[artifact]-[revision].[ext]" type="jar,bundle" transitive="false"/>
+		<copy todir="${build.lib.dir}">
+			<!-- Je kunt hier geen subdirectories gebruiken -->
+			<fileset dir="${intern.lib.dir}" includes="*.jar"  />
+		</copy>
+<!--	<copy todir="${build.lib.dir}">
+			<fileset dir="${alg.lib.project}/lib/mc" includes="*.jar" />
+		</copy>
+-->
+		
+		<!-- Dit roept de build file in pu.base aan, die de pu.base.jar maakt -->
+		<ant dir="${pu.base.project}" inheritall="false" />
+	
+		<copy todir="${build.lib.dir}">
+			<fileset dir="${pu.base.project}/build" includes="*.jar" />
+		</copy>
+
+	</target>
+
+	<!-- ============================================================== -->
+	<!-- Deploy                                                         -->
+	<!-- ============================================================== -->
+
+	<target name="deploy-tst" depends="build-tst, deploy-alg" description="Deploy tst version" />
+	<target name="deploy-acc" depends="build-acc, deploy-alg" description="Deploy acc version" />
+	<target name="deploy-prd-mc" depends="build-prd-mc, deploy-alg" description="Deploy prd version" />
+	<target name="deploy-prd-ddb" depends="build-prd-ddb, deploy-alg" description="Deploy prd version" />
+	<target name="deploy-prd-jwt" depends="build-prd-jwt, deploy-alg" description="Deploy prd version" />
+	<target name="deploy-alg">
+
+		<property name="deploy.dir" value="${deploy.base.dir}/${projectname}/${omgeving}/${projectname}" />
+		
+		<delete dir="${deploy.dir}" />
+		<mkdir dir="${deploy.dir}" />
+
+		<copy todir="${deploy.dir}" preservelastmodified="true" overwrite="true">
+			<fileset dir="${build.dir}">
+				<!-- Door dit weg te laten worden ook lege directories gekopieerd -->
+				<!--  <include name="**/*.*"/> -->
+			</fileset>
+		</copy>
+
+	</target>
+
+</project>
