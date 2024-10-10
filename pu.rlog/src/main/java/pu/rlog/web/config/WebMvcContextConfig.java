@@ -41,10 +41,11 @@ public class WebMvcContextConfig implements WebMvcConfigurer
 //		registry.addResourceHandler( "/js/**/*"     ).addResourceLocations( "WEB-INF/web-resources/js/" );
 //		registry.addResourceHandler( "/images/**/*" ).addResourceLocations( "WEB-INF/web-resources/images/" );
 		
-		// Dus dan maar 1 nivo diep
-		registry.addResourceHandler( "/css/*"    ).addResourceLocations( "WEB-INF/web-resources/css/" );
-		registry.addResourceHandler( "/js/*"     ).addResourceLocations( "WEB-INF/web-resources/js/" );
-		registry.addResourceHandler( "/images/*" ).addResourceLocations( "WEB-INF/web-resources/images/" );
+		// Dubbele sterretjes achteraan betekent dat alle subdirectories ook tellen
+		// registry.addResourceHandler( "/resources/**"    ).addResourceLocations( "WEB-INF/web-resources/" );
+		registry.addResourceHandler( "/css/**"    ).addResourceLocations( "WEB-INF/web-resources/css/" );
+		registry.addResourceHandler( "/js/**"     ).addResourceLocations( "WEB-INF/web-resources/js/" );
+		registry.addResourceHandler( "/images/**" ).addResourceLocations( "WEB-INF/web-resources/images/" );
 	}
 
 	@Override
