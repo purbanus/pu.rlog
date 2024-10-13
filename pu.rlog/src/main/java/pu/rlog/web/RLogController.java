@@ -12,13 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.util.HtmlUtils;
 
 import pu.rlog.bo.ClientData;
 import pu.rlog.bo.ClientNotFoundException;
 import pu.rlog.service.RLogService;
 
-import ch.qos.logback.classic.spi.LoggingEventVO;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import lombok.Data;
 
 /**
@@ -29,7 +28,7 @@ import lombok.Data;
 public class RLogController
 {
 	
-	private static final Logger logger = LoggerFactory.getLogger(RLogController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RLogController.class);
 	
 	@Autowired
 	private RLogService rLogService;
@@ -37,7 +36,7 @@ public class RLogController
 	@RequestMapping(value = { "/active.html", "/active", "/" }, method = RequestMethod.GET)
 	public ModelAndView active()
 	{
-		logger.info( "Active logs" );
+		LOG.info( "Active logs" );
 
 		List<ClientData> clients = getRLogService().getActiveClients();
 		Map<String, Object> model = new HashMap<>();
@@ -47,11 +46,11 @@ public class RLogController
 	@RequestMapping(value = "/client.html", method = RequestMethod.GET)
 	public ModelAndView client( @RequestParam( "id" ) int aClientId ) throws ClientNotFoundException
 	{
-		logger.info( "Log van client " + aClientId );
+		LOG.info( "Log van client " + aClientId );
 
 		try
 		{
-			List<LoggingEventVO> log = getRLogService().getClientLog( aClientId );
+			List<ILoggingEvent> log = getRLogService().getClientLog( aClientId );
 			//String log = HtmlUtils.htmlEscape( rawLog );
 			
 			Map<String, Object> model = new HashMap<>();

@@ -1,11 +1,22 @@
 package pu.rlog.config;
 
+import java.io.File;
+
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import pu.rlog.bo.SimpleSocketServer;
+import pu.rlog.bo.impl.RLogSocketServer;
+
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.core.joran.spi.JoranException;
 
 /*
  * Reden om de properties in een ouderwetse XML laden:
@@ -37,15 +48,30 @@ public class Config
     	// Bijvoorbeeld een complexe DataSource
     }
 
-//	@Value( "${rlog.logdir}" )  private String logDir;
-//	@Value( "${rlog.logport}" )	private int logPort;
-//	@Bean
-//	public RLogServer rlogServer()
-//	{
-//		RLogServer server = new RLogServer(  );
-//		server.setLogDir( logDir );
-//		server.setPort( logPort );
-//		return server;
-//	}
+	@Value( "${rlog.logdir}" )  private String logDir;
+	@Value( "${rlog.logport}" )	private int logPort;
+	@Value( "${rlog.configFile}" ) private String configFile;
+
+	@Bean
+	public RLogSocketServer rLogSocketServer() throws JoranException
+	{
+//		URL url = StartSimpleSocketServer.class.getResource( path );
+		File file = new File( configFile );
+		if ( ! file.exists() )
+		{
+			System.err.println( "File bestaat niet!" );
+			throw new RuntimeException( "ConfigFile " + configFile + " bestaat niet !!!" );
+		}
+		String configFileAbsolutePath = file.getAbsolutePath();
+		System.out.println( "Absolute path van configFile=" + configFileAbsolutePath );
+
+		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+	    SimpleSocketServer.configureLC( loggerContext, configFileAbsolutePath );
+
+	    RLogSocketServer socketServer = new RLogSocketServer( loggerContext, logPort, logDir );
+	    socketServer.start();
+
+		return socketServer;
+	}
 	
 }
