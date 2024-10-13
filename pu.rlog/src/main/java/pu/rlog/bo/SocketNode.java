@@ -39,7 +39,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
  * 
  * @since 0.8.4
  */
-public class SocketNode implements Runnable {
+public abstract class SocketNode implements Runnable {
 
     Socket socket;
     LoggerContext context;
@@ -64,7 +64,12 @@ public class SocketNode implements Runnable {
     // System.err.flush();
     // }
 
-    public void run() {
+    protected Socket getSocket()
+    {
+    	return socket;
+    }
+    @Override
+	public void run() {
 
         try {
             hardenedLoggingEventInputStream = new HardenedLoggingEventInputStream(
@@ -84,10 +89,12 @@ public class SocketNode implements Runnable {
                 // get a logger from the hierarchy. The name of the logger is taken to
                 // be the name contained in the event.
                 remoteLogger = context.getLogger(event.getLoggerName());
+                preAppend( event);
                 // apply the logger-level filter
                 if (remoteLogger.isEnabledFor(event.getLevel())) {
                     // finally log the event as if was generated locally
                     remoteLogger.callAppenders(event);
+                    doAppend( event );
                 }
             }
         } catch (java.io.EOFException e) {
@@ -105,7 +112,11 @@ public class SocketNode implements Runnable {
         close();
     }
 
-    void close() {
+	protected abstract void preAppend( ILoggingEvent aEvent );
+
+    protected abstract void doAppend( ILoggingEvent aEvent );
+
+	void close() {
         if (closed) {
             return;
         }

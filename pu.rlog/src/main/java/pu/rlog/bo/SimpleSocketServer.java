@@ -25,6 +25,9 @@ import javax.net.ServerSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import pu.rlog.bo.impl.RLogSocketNode;
+import pu.rlog.bo.impl.RLogSocketServer;
+
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
@@ -47,7 +50,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
  * 
  * @since 0.8.4
  */
-public class SimpleSocketServer extends Thread {
+public abstract class SimpleSocketServer extends Thread {
 
     Logger logger = LoggerFactory.getLogger(SimpleSocketServer.class);
 
@@ -55,6 +58,9 @@ public class SimpleSocketServer extends Thread {
     private final LoggerContext lc;
     private boolean closed = false;
     private ServerSocket serverSocket;
+	/**
+	 * The currently attached clients
+	 */
     private List<SocketNode> socketNodeList = new ArrayList<SocketNode>();
 
     // used for testing purposes
@@ -76,7 +82,7 @@ public class SimpleSocketServer extends Thread {
         LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
         configureLC(lc, configFile);
 
-        SimpleSocketServer sss = new SimpleSocketServer(lc, port);
+        SimpleSocketServer sss = new RLogSocketServer(lc, port, null );
         sss.start();
     }
 
@@ -84,8 +90,12 @@ public class SimpleSocketServer extends Thread {
         this.lc = lc;
         this.port = port;
     }
-
-    public void run() {
+    protected List<SocketNode> getSocketNodeList()
+    {
+    	return socketNodeList;
+    }
+    @Override
+	public void run() {
 
         final String oldThreadName = Thread.currentThread().getName();
 
@@ -102,9 +112,9 @@ public class SimpleSocketServer extends Thread {
                 Socket socket = serverSocket.accept();
                 logger.info("Connected to client at " + socket.getInetAddress());
                 logger.info("Starting new socket node.");
-                SocketNode newSocketNode = new SocketNode(this, socket, lc);
+                SocketNode newSocketNode = createSocketNode(this, socket, lc);
                 synchronized (socketNodeList) {
-                    socketNodeList.add(newSocketNode);
+                    socketNodeList.add( newSocketNode );
                 }
                 final String clientThreadName = getClientThreadName(socket);
                 new Thread(newSocketNode, clientThreadName).start();
@@ -121,6 +131,14 @@ public class SimpleSocketServer extends Thread {
             Thread.currentThread().setName(oldThreadName);
         }
     }
+    /**
+     * Create a SocketNode
+     * @param aSimpleSocketServer
+     * @param aSocket
+     * @param aLc
+     * @return the SocketNode
+     */
+    protected abstract RLogSocketNode createSocketNode( SimpleSocketServer aSimpleSocketServer, Socket aSocket, LoggerContext aLc );
 
     /**
      * Returns the name given to the server thread.

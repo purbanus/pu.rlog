@@ -21,13 +21,13 @@ $(document).ready(function()
 <body>
 	<h1>Active Logs</h1>
 	<br />
-<#--	<p>Aantal	Issues=${issuesDocument.issues.size()}</p> -->
 	<table id="detabel" class="sortable" >
 		<thead>
 			<tr>
 				<th class="header number">Client ID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 				<th class="header string">User</th>
 				<th class="header number sorter-ipAddress">IP Adres&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+				<th class="header string">Host Name</th>
 				<th class="header date"  >Started</th>
 				<th class="header date"  >Last Activity</th>
 				<th class="header number">History Size&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
@@ -38,6 +38,7 @@ $(document).ready(function()
 				<td class="number"><a href='<@spring.url "/client.html?id=${client.clientId}" />'>${client.clientId}</a></td>
 				<td class="string">${client.user}</td>
 				<td class="number">${client.ipAddress}</td>
+				<td class="string">${client.hostName}</td>
 				<td class="date"  >${client.timeStarted?datetime}</td>
 				<td class="date"  >${client.timeLastActivity?datetime}</td>
 				<td class="number">${client.historySize}</td>

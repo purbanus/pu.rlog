@@ -1,43 +1,41 @@
 package pu.rlog.service.impl;
 
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import pu.rlog.bo.ClientData;
 import pu.rlog.bo.ClientNotFoundException;
+import pu.rlog.bo.impl.RLogSocketServer;
 import pu.rlog.service.RLogService;
 
-import ch.qos.logback.classic.spi.LoggingEventVO;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import lombok.Data;
 
 @Service
+@Data
 public class RLogServiceImpl implements RLogService
 {
+@Autowired
+private RLogSocketServer rLogSocketServer;
 
 @Override
 public List<ClientData> getActiveClients()
 {
-	ClientData [] clientData = {
-		new ClientData( 1, "192.168.178.50", new Date(), new Date(), 65536, "peter" ),
-		new ClientData( 2, "192.168.178.55", new Date(), new Date(), 32767, "purbanus" ),
-	};
-	return Arrays.asList( clientData );
+	return getRLogSocketServer().getClientData();
 }
 
 @Override
 public ClientData getClient( int aClientId ) throws ClientNotFoundException
 {
-	// TODO Auto-generated method stub
-	return null;
+	return getRLogSocketServer().getClient( aClientId );
 }
 
 @Override
-public List<LoggingEventVO> getClientLog( int aClientId ) throws ClientNotFoundException
+public List<ILoggingEvent> getClientLog( int aClientId ) throws ClientNotFoundException
 {
-	// TODO Auto-generated method stub
-	return null;
+	return getRLogSocketServer().getClientLog( aClientId );
 }
 
 }

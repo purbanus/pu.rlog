@@ -1,7 +1,6 @@
 package pu.rlog.bo;
 
 import java.io.File;
-import java.net.URL;
 
 import ch.qos.logback.classic.net.SimpleSocketServer;
 

@@ -31,7 +31,8 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.springframework.beans" level="info" additivity="false" />
+<!-- 	<logger name="org.springframework.beans" level="info" additivity="false" /> -->
+	<logger name="org.springframework.jndi" level="info" additivity="false" />
 
 	<!-- In plaats van alles wat je niet hoeft te zien hierboven op INFO te zetten, kun je ook alles wat je WEL wilt zien hieronder op DEBUG zetten -->
 <!-- 	
