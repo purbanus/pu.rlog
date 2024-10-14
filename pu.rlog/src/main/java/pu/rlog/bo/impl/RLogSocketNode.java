@@ -88,6 +88,7 @@ private final TailBuffer<ILoggingEvent> historyBuffer = new TailBuffer<>( ILoggi
 	protected void doAppend( ILoggingEvent aEvent )
 	{
 		getHistoryBuffer().put( aEvent );
+		clientData.setTimeLastActivity( new Date() );
 	}
 
 }
