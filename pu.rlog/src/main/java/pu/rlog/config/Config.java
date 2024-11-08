@@ -17,6 +17,7 @@ import pu.rlog.bo.impl.RLogSocketServer;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter2;
 
 /*
  * Reden om de properties in een ouderwetse XML laden:
@@ -71,6 +72,7 @@ public class Config
 	    RLogSocketServer socketServer = new RLogSocketServer( loggerContext, logPort, logDir );
 	    socketServer.start();
 
+	    new StatusPrinter2().print( loggerContext );
 		return socketServer;
 	}
 	
